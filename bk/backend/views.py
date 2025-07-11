@@ -1,5 +1,3 @@
-# views.py
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,20 +5,55 @@ from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
+import json
 from .models import Employee, InstagramApp
 from .serializers import EmployeeLoginSerializer, InstagramAppSerializer
 import requests
-import json
+
+
+# -------------------------------
+# Login View
+# -------------------------------
+class LoginView(APIView):
+    def post(self, request):
+        serializer = EmployeeLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = authenticate(
+                employee_id=serializer.validated_data['employee_id'],
+                password=serializer.validated_data['password']
+            )
+            if user:
+                token, _ = Token.objects.get_or_create(user=user)
+                return Response({'token': token.key}, status=200)
+            return Response({'error': 'Invalid credentials'}, status=401)
+        return Response(serializer.errors, status=400)
+
+
+# -------------------------------
+# Assigned Instagram Apps View
+# -------------------------------
+class AssignedAppsView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        employee = request.user
+        apps = employee.instagram_apps.all()  # only assigned apps
+        serializer = InstagramAppSerializer(apps, many=True)
+        return Response(serializer.data, status=200)
+
+# ConversationApi View
 
 class ConversationsView(APIView):
     def get(self, request):
         access_token = request.query_params.get("access_token")
         ig_user_id = request.query_params.get("ig_user_id")
-
+        print(access_token)
+        print(ig_user_id)
         if not access_token or not ig_user_id:
             return Response({"error": "Missing access_token or ig_user_id"}, status=400)
 
-        url = f"https://graph.instagram.com/v23.0/{ig_user_id}/conversations"
+        url = f"https://graph.instagram.com/v23.0/me/conversations"
         params = {
             "platform": "instagram",
             "access_token": access_token,
@@ -31,7 +64,8 @@ class ConversationsView(APIView):
             convo_response = requests.get(url, params=params)
             convo_data = convo_response.json()
             users = {}
-
+            print(convo_response)
+            print(convo_data)
             for convo in convo_data.get("data", []):
                 participants = convo.get("participants", {}).get("data", [])
 
@@ -72,28 +106,3 @@ class ConversationsView(APIView):
         except Exception as e:
             print("⚠️ Failed to fetch conversations:", str(e))
             return Response({"error": str(e)}, status=500)
-
-
-class LoginView(APIView):
-    def post(self, request):
-        serializer = EmployeeLoginSerializer(data=request.data)
-        if serializer.is_valid():
-            user = authenticate(
-                employee_id=serializer.validated_data['employee_id'],
-                password=serializer.validated_data['password']
-            )
-            if user:
-                token, _ = Token.objects.get_or_create(user=user)
-                return Response({'token': token.key}, status=200)
-            return Response({'error': 'Invalid credentials'}, status=401)
-        return Response(serializer.errors, status=400)
-
-
-class AssignedAppsView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        apps = InstagramApp.objects.filter(employees=request.user)
-        serializer = InstagramAppSerializer(apps, many=True)
-        return Response(serializer.data, status=200)
