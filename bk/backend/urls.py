@@ -16,11 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import LoginView, AssignedAppsView , ConversationsView
+from .views import LoginView, AssignedAppsView , ConversationsView , FetchMessagesView , ChatHistoryView, WebhookView, SendMessageView
 
 urlpatterns = [
+    path('webhook/', WebhookView.as_view(), name='webhook'),
     path('admin/', admin.site.urls),
     path('api/login/', LoginView.as_view(), name='login'),
     path('api/assigned-apps/', AssignedAppsView.as_view(), name='assigned-apps'),
-    path('api/conversations/', ConversationsView.as_view(), name='conversations')
+    path('api/conversations/', ConversationsView.as_view(), name='conversations'),
+    path('api/fetch_messages/<str:user_id>/', FetchMessagesView.as_view(), name='fetch_messages'),
+    path('api/chat-history/<str:user_id>/', ChatHistoryView.as_view(), name='chat-history'),
+        path('api/send_message/', SendMessageView.as_view(), name='send_message'), 
+
 ]

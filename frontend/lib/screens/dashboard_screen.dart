@@ -78,12 +78,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildAppCard(Map<String, dynamic> app, int index) {
+    final String accessToken = app['access_token'] ?? '';
+    final String igUserId = app['app_id'] ?? '';
+    final String name = app['name'] ?? 'Unnamed App';
+
     return GestureDetector(
       onTap: () {
-        final accessToken = app['access_token'];
-        final igUserId = app['app_id'];
-
-        if (accessToken == null || igUserId == null) {
+        if (accessToken.isEmpty || igUserId.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Missing access token or app ID.")),
           );
@@ -123,7 +124,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      app['name'] ?? 'Unnamed App',
+                      name,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -131,7 +132,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "App ID: ${app['app_id']}",
+                      "App ID: $igUserId",
                       style: const TextStyle(color: Colors.grey),
                     ),
                   ],
@@ -149,68 +150,66 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWideScreen = constraints.maxWidth > 600;
-        final contentWidth = isWideScreen ? 520.0 : double.infinity;
 
         return Scaffold(
           backgroundColor: Colors.grey.shade50,
-appBar: PreferredSize(
-  preferredSize: const Size.fromHeight(kToolbarHeight),
-  child: Center(
-    child: Container(
-      constraints: const BoxConstraints(maxWidth: 520),
-      decoration: const BoxDecoration(
-        color: Colors.deepPurple,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(16),
-          bottomRight: Radius.circular(16),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          )
-        ],
-      ),
-      child: AppBar(
-        backgroundColor: Colors.deepPurple,
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        title: const Text(
-          "Connected Instagram Apps",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: "Logout",
-            onPressed: _confirmLogout,
-          ),
-        ],
-      ),
-    ),
-  ),
-),
-body: Center(
-  child: Container(
-    constraints: const BoxConstraints(maxWidth: 520),
-    decoration: BoxDecoration(
-      color: const Color(0xFFF7F7F7), // subtle light grey background
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: _loading
-        ? const Center(child: CircularProgressIndicator())
-        : _apps.isEmpty
-            ? const Center(child: Text("No Instagram apps found."))
-            : ListView.builder(
-                itemCount: _apps.length,
-                itemBuilder: (context, index) {
-                  return _buildAppCard(_apps[index], index);
-                },
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(kToolbarHeight),
+            child: Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 520),
+                decoration: const BoxDecoration(
+                  color: Colors.deepPurple,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
+                    )
+                  ],
+                ),
+                child: AppBar(
+                  backgroundColor: Colors.deepPurple,
+                  automaticallyImplyLeading: false,
+                  centerTitle: true,
+                  title: const Text(
+                    "Connected Instagram Apps",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.logout),
+                      tooltip: "Logout",
+                      onPressed: _confirmLogout,
+                    ),
+                  ],
+                ),
               ),
-  ),
-),
-
+            ),
+          ),
+          body: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 520),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF7F7F7),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _apps.isEmpty
+                      ? const Center(child: Text("No Instagram apps found."))
+                      : ListView.builder(
+                          itemCount: _apps.length,
+                          itemBuilder: (context, index) {
+                            return _buildAppCard(_apps[index], index);
+                          },
+                        ),
+            ),
+          ),
         );
       },
     );

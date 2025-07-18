@@ -27,10 +27,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "8000-shivam63982-instaappsma-ubki0pugw8g.ws-us120.gitpod.io",
+    '8001-shivam63982-instaappsma-ubki0pugw8g.ws-us120.gitpod.io',
+    "a8e02eb2dbfb.ngrok-free.app"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://8000-shivam63982-instaappsma-ubki0pugw8g.ws-us120.gitpod.io",
+    "https://8001-shivam63982-instaappsma-ubki0pugw8g.ws-us120.gitpod.io"
 ]
 
 # Application definition
@@ -46,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'import_export',
+    'channels'
 
 ]
 
@@ -142,5 +146,14 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://8000-shivam63982-instaappsma-ubki0pugw8g.ws-us120.gitpod.io",
+    "https://8001-shivam63982-instaappsma-ubki0pugw8g.ws-us120.gitpod.io"
 
 ]   
+
+ASGI_APPLICATION = "backend.asgi.application"
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
+

@@ -42,9 +42,9 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f"{self.employee_id} - {self.name}"
 
-# -----------------------
+
 # Instagram App Model
-# -----------------------
+
 class InstagramApp(models.Model):
     name = models.CharField(max_length=100, blank=True)
     app_id = models.CharField(max_length=100, unique=True)
